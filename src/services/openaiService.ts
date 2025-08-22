@@ -34,7 +34,7 @@ export const generateCoverLetter = async (data: FormData): Promise<CoverLetterRe
 
   // Prompt for project/work suggestion
   const suggestionPrompt = `You are an expert career counselor. Based on the following candidate profile and job description, suggest a specific project or type of work the candidate can do to improve their chances of getting this job and make themselves more valuable for this role. Be concrete and actionable.\n\nCANDIDATE SKILLS: ${data.skills}\nCANDIDATE EXPERIENCE: ${data.experience}\nJOB DESCRIPTION: ${data.jobDescription}`;
-
+ 
   try {
   // Get cover letter
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
