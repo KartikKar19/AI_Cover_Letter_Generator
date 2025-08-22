@@ -1,3 +1,22 @@
+// Utility to extract skills from a string (comma or semicolon separated)
+function extractSkills(skillsString: string): string[] {
+  return skillsString
+    .split(/[,;\n]/)
+    .map(s => s.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+// Calculate fit score based on overlap between candidate and job description skills
+export function calculateFitScore(candidateSkills: string, jobDescription: string): number {
+  const candidateList = extractSkills(candidateSkills);
+  // Extract words that look like skills from job description (simple approach)
+  const jobSkills = jobDescription.match(/\b[a-zA-Z][a-zA-Z0-9\-\+\. ]{1,}\b/g) || [];
+  const jobList = jobSkills.map(s => s.trim().toLowerCase());
+  if (candidateList.length === 0 || jobList.length === 0) return 0;
+  const matchCount = candidateList.filter(skill => jobList.includes(skill)).length;
+  // Fit score as percent of candidate skills found in job description
+  return Math.round((matchCount / candidateList.length) * 100);
+}
 import { FormData, CoverLetterAnalysis } from '../types';
 
 interface CoverLetterResponse {
@@ -8,10 +27,48 @@ interface CoverLetterResponse {
 export const generateCoverLetter = async (data: FormData): Promise<CoverLetterResponse> => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
-  const prompt = `You are an expert career counselor and cover letter writer. Create a highly personalized, ATS-optimized cover letter and provide detailed analysis.\n\nCANDIDATE INFORMATION:\nName: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\nSkills: ${data.skills}\nExperience: ${data.experience}\nAchievements: ${data.achievements}\n\nTARGET POSITION:\nCompany: ${data.company}\nPosition: ${data.position}\nJob Description: ${data.jobDescription}\nCompany Website: ${data.companyWebsite || 'Not provided'}\n\nCUSTOMIZATION:\nTone: ${data.tone}\nIndustry: ${data.industry}\n\nREQUIREMENTS:\n1. Write a compelling cover letter that:\n   - Matches the specified tone (${data.tone})\n   - Uses industry-appropriate language for ${data.industry}\n   - Incorporates specific keywords from the job description\n   - Highlights quantifiable achievements and metrics\n   - Addresses potential gaps diplomatically\n   - Shows deep understanding of the company and role\n   - Stands out from generic AI-generated letters\n\n2. Provide analysis including:\n   - Job fit score (0-100)\n   - Relevance score for ATS (0-100)\n   - List of strengths that align with the job\n   - Potential gaps or areas to address\n   - ATS keywords successfully incorporated\n   - Specific improvement suggestions\n\nReturn your response as a JSON object with this exact structure:\n{\n  "coverLetter": "The complete cover letter text",\n  "analysis": {\n    "fitScore": 85,\n    "relevanceScore": 92,\n    "strengths": ["strength1", "strength2"],\n    "gaps": ["gap1", "gap2"],\n    "atsKeywords": ["keyword1", "keyword2"],\n    "suggestions": ["suggestion1", "suggestion2"]\n  }\n}\n\nMake the cover letter authentic, specific, and compelling. Avoid generic phrases and ensure it feels personally written.`;
+  const fitScore = calculateFitScore(data.skills, data.jobDescription);
+
+  // Prompt for cover letter
+  const prompt = `You are an expert career counselor and cover letter writer. Create a highly personalized, ATS-optimized cover letter for the candidate below. Only return the cover letter text, do not include any JSON, analysis, or extra commentary.\n\nCANDIDATE INFORMATION:\nName: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\nSkills: ${data.skills}\nExperience: ${data.experience}\nAchievements: ${data.achievements}\n\nTARGET POSITION:\nCompany: ${data.company}\nPosition: ${data.position}\nJob Description: ${data.jobDescription}\nCompany Website: ${data.companyWebsite || 'Not provided'}\n\nCUSTOMIZATION:\nTone: ${data.tone}\nIndustry: ${data.industry}\n\nREQUIREMENTS:\n- Write a compelling cover letter that matches the specified tone and industry, incorporates keywords from the job description, highlights quantifiable achievements, addresses potential gaps diplomatically, and shows understanding of the company and role.\n- Make the cover letter authentic, specific, and compelling. Avoid generic phrases and ensure it feels personally written.\n- Do NOT include any JSON, analysis, or extra commentary. Only output the cover letter text.`;
+
+  // Prompt for project/work suggestion
+  const suggestionPrompt = `You are an expert career counselor. Based on the following candidate profile and job description, suggest a specific project or type of work the candidate can do to improve their chances of getting this job and make themselves more valuable for this role. Be concrete and actionable.\n\nCANDIDATE SKILLS: ${data.skills}\nCANDIDATE EXPERIENCE: ${data.experience}\nJOB DESCRIPTION: ${data.jobDescription}`;
 
   try {
+  // Get cover letter
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          parts: [
+            { text: prompt }
+          ]
+        }
+      ]
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
+  }
+
+  const result = await response.json();
+  const content = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+  if (!content) {
+    throw new Error('No content received from Gemini');
+  }
+
+  // Get project/work suggestion from LLM
+  let suggestion = '';
+  try {
+    const suggestionRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -20,45 +77,31 @@ export const generateCoverLetter = async (data: FormData): Promise<CoverLetterRe
         contents: [
           {
             parts: [
-              { text: prompt }
+              { text: suggestionPrompt }
             ]
           }
         ]
       }),
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
+    if (suggestionRes.ok) {
+      const suggestionResult = await suggestionRes.json();
+      suggestion = suggestionResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
     }
+  } catch (e) {
+    suggestion = '';
+  }
 
-    const result = await response.json();
-    const content = result.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!content) {
-      throw new Error('No content received from Gemini');
+  return {
+    coverLetter: content,
+    analysis: {
+      fitScore,
+      relevanceScore: 0,
+      strengths: [],
+      gaps: [],
+      atsKeywords: [],
+      suggestions: [suggestion]
     }
-
-    try {
-      const parsedResponse = JSON.parse(content);
-      return {
-        coverLetter: parsedResponse.coverLetter,
-        analysis: parsedResponse.analysis
-      };
-    } catch (parseError) {
-      // Fallback if JSON parsing fails
-      return {
-        coverLetter: content,
-        analysis: {
-          fitScore: 75,
-          relevanceScore: 70,
-          strengths: ['Experience matches job requirements', 'Strong technical skills'],
-          gaps: ['Consider highlighting more specific achievements'],
-          atsKeywords: ['leadership', 'experience', 'skills'],
-          suggestions: ['Add more quantifiable metrics', 'Strengthen opening paragraph']
-        }
-      };
-    }
+  };
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to generate cover letter: ${error.message}`);

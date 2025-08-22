@@ -56,6 +56,16 @@ const CoverLetterDisplay: React.FC<CoverLetterDisplayProps> = ({ coverLetter, an
       {/* Analysis Dashboard */}
       {analysis && (
         <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+          {/* Project/Work Suggestion Section */}
+          {analysis.suggestions && analysis.suggestions.length > 0 && (
+            <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+              <h3 className="font-semibold text-yellow-800 mb-2 flex items-center">
+                <TrendingUp className="w-4 h-4 mr-2" />
+                Project/Work to Improve Your Chances
+              </h3>
+              <p className="text-sm text-yellow-900">{analysis.suggestions[0]}</p>
+            </div>
+          )}
           <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
             <BarChart3 className="w-5 h-5 mr-2 text-blue-500" />
             Cover Letter Analysis
