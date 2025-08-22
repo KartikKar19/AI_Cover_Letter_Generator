@@ -149,7 +149,7 @@ function App() {
         
         <footer className="text-center mt-16 pt-8 border-t border-gray-200">
           <p className="text-gray-500 text-sm">
-            Powered by advanced AI technology. Your data is processed securely and analysis helps optimize for both human readers and ATS systems.
+            Created by Kartik Kar 2025 with love. &copy; All rights reserved.
           </p>
         </footer>
       </div>
