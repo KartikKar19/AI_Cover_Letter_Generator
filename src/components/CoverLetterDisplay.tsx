@@ -54,113 +54,7 @@ const CoverLetterDisplay: React.FC<CoverLetterDisplayProps> = ({ coverLetter, an
   return (
     <div className="space-y-6">
       {/* Analysis Dashboard */}
-      {analysis && (
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          {/* Project/Work Suggestion Section */}
-          {analysis.suggestions && analysis.suggestions.length > 0 && (
-            <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
-              <h3 className="font-semibold text-yellow-800 mb-2 flex items-center">
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Project/Work to Improve Your Chances
-              </h3>
-              <p className="text-sm text-yellow-900">{analysis.suggestions[0]}</p>
-            </div>
-          )}
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <BarChart3 className="w-5 h-5 mr-2 text-blue-500" />
-            Cover Letter Analysis
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-              <div className={`text-3xl font-bold mb-1 ${getScoreColor(analysis.fitScore)}`}>
-                {analysis.fitScore}%
-              </div>
-              <div className="text-sm text-gray-600">Job Fit Score</div>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
-              <div className={`text-3xl font-bold mb-1 ${getScoreColor(analysis.relevanceScore)}`}>
-                {analysis.relevanceScore}%
-              </div>
-              <div className="text-sm text-gray-600">ATS Relevance</div>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
-              <div className="text-3xl font-bold mb-1 text-purple-600">
-                {analysis.atsKeywords.length}
-              </div>
-              <div className="text-sm text-gray-600">ATS Keywords</div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-semibold text-green-700 mb-3 flex items-center">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Strengths ({analysis.strengths.length})
-              </h3>
-              <ul className="space-y-2">
-                {analysis.strengths.map((strength, index) => (
-                  <li key={index} className="flex items-start">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                    <span className="text-sm text-gray-700">{strength}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-amber-700 mb-3 flex items-center">
-                <AlertTriangle className="w-4 h-4 mr-2" />
-                Areas to Address ({analysis.gaps.length})
-              </h3>
-              <ul className="space-y-2">
-                {analysis.gaps.map((gap, index) => (
-                  <li key={index} className="flex items-start">
-                    <div className="w-2 h-2 bg-amber-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                    <span className="text-sm text-gray-700">{gap}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {analysis.atsKeywords.length > 0 && (
-            <div className="mt-6">
-              <h3 className="font-semibold text-blue-700 mb-3 flex items-center">
-                <Target className="w-4 h-4 mr-2" />
-                ATS Keywords Included
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {analysis.atsKeywords.map((keyword, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
-                  >
-                    {keyword}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {analysis.suggestions.length > 0 && (
-            <div className="mt-6">
-              <h3 className="font-semibold text-purple-700 mb-3 flex items-center">
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Improvement Suggestions
-              </h3>
-              <ul className="space-y-2">
-                {analysis.suggestions.map((suggestion, index) => (
-                  <li key={index} className="flex items-start">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                    <span className="text-sm text-gray-700">{suggestion}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
+  {/* No analysis dashboard, only suggestions below cover letter */}
 
       {/* Cover Letter Content */}
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
@@ -232,6 +126,26 @@ const CoverLetterDisplay: React.FC<CoverLetterDisplayProps> = ({ coverLetter, an
           </div>
         )}
       </div>
+
+      {/* Suggestions Section Below Cover Letter */}
+      {analysis && analysis.suggestions && analysis.suggestions[0] && (
+        <div className="bg-yellow-50 rounded-xl shadow-lg p-6 border border-yellow-200">
+          <h3 className="font-semibold text-yellow-800 mb-2 flex items-center">
+            <TrendingUp className="w-4 h-4 mr-2" />
+            How to Improve Your Chances
+          </h3>
+          <ul className="list-disc pl-6 space-y-2">
+            {analysis.suggestions[0]
+              .replace(/\bthey\b/gi, 'you')
+              .replace(/\btheir\b/gi, 'your')
+              .split(/\n|\r|\r\n|\*/)
+              .filter(line => line.trim())
+              .map((line, idx) => (
+                <li key={idx} className="text-sm text-yellow-900" dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') }} />
+              ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

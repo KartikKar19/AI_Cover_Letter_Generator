@@ -19,7 +19,7 @@ const Header: React.FC = () => {
       </h1>
       <div className="max-w-4xl mx-auto">
         <p className="text-xl text-gray-600 mb-4 leading-relaxed">
-          Create professional, personalized cover letters powered by advanced AI technology.
+          Because I can't write a personalized cover letter for every company—when a million companies come to campus, let AI do it for me and you!
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
           <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 border border-gray-200">
