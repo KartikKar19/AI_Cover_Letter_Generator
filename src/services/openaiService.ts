@@ -10,7 +10,7 @@ function extractSkills(skillsString: string): string[] {
 export function calculateFitScore(candidateSkills: string, jobDescription: string): number {
   const candidateList = extractSkills(candidateSkills);
   // Extract words that look like skills from job description (simple approach)
-  const jobSkills = jobDescription.match(/\b[a-zA-Z][a-zA-Z0-9\-\+\. ]{1,}\b/g) || [];
+  const jobSkills = jobDescription.match(/\b[a-zA-Z][a-zA-Z0-9\-+. ]{1,}\b/g) || [];
   const jobList = jobSkills.map(s => s.trim().toLowerCase());
   if (candidateList.length === 0 || jobList.length === 0) return 0;
   const matchCount = candidateList.filter(skill => jobList.includes(skill)).length;
@@ -87,7 +87,7 @@ export const generateCoverLetter = async (data: FormData): Promise<CoverLetterRe
       const suggestionResult = await suggestionRes.json();
       suggestion = suggestionResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
     }
-  } catch (e) {
+  } catch (_e) {
     suggestion = '';
   }
 

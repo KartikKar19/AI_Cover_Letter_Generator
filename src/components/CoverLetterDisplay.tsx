@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, Download, Edit3, BarChart3, Target, AlertTriangle, CheckCircle, TrendingUp } from 'lucide-react';
+import { Copy, Check, Download, Edit3, TrendingUp } from 'lucide-react';
 import { CoverLetterAnalysis } from '../types';
 
 interface CoverLetterDisplayProps {
@@ -45,11 +45,6 @@ const CoverLetterDisplay: React.FC<CoverLetterDisplayProps> = ({ coverLetter, an
     document.body.removeChild(element);
   };
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600 bg-green-100';
-    if (score >= 60) return 'text-yellow-600 bg-yellow-100';
-    return 'text-red-600 bg-red-100';
-  };
 
   return (
     <div className="space-y-6">
