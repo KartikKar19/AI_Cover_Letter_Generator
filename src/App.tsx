@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Save } from 'lucide-react';
+import { FileText, Save } from 'lucide-react'; // Only used icons are imported
 import Header from './components/Header';
 import CoverLetterForm from './components/CoverLetterForm';
 import CoverLetterDisplay from './components/CoverLetterDisplay';
@@ -25,8 +25,8 @@ function App() {
       const result = await generateCoverLetter(formData);
       setCoverLetter(result.coverLetter);
       setAnalysis(result.analysis);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
