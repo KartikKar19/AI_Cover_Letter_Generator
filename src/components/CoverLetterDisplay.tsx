@@ -5,7 +5,7 @@ import { CoverLetterAnalysis } from '../types';
 interface CoverLetterDisplayProps {
   coverLetter: string;
   analysis: CoverLetterAnalysis | null;
-  onEdit?: (newContent: string) => void;
+  onEdit?: (_newContent: string) => void;
 }
 
 const CoverLetterDisplay: React.FC<CoverLetterDisplayProps> = ({ coverLetter, analysis, onEdit }) => {

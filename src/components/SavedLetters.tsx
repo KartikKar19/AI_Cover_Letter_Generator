@@ -3,7 +3,7 @@ import { Save, Trash2, Eye, Calendar, Building, Briefcase } from 'lucide-react';
 import { SavedLetter } from '../types';
 
 interface SavedLettersProps {
-  onLoadLetter: (letter: SavedLetter) => void;
+  onLoadLetter: (_letter: SavedLetter) => void;
 }
 
 const SavedLetters: React.FC<SavedLettersProps> = ({ onLoadLetter }) => {

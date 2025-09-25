@@ -36,39 +36,8 @@ export const generateCoverLetter = async (data: FormData): Promise<CoverLetterRe
   const suggestionPrompt = `You are an expert career counselor. Based on the following candidate profile and job description, suggest a specific project or type of work the candidate can do to improve their chances of getting this job and make themselves more valuable for this role. Be concrete and actionable.\n\nCANDIDATE SKILLS: ${data.skills}\nCANDIDATE EXPERIENCE: ${data.experience}\nJOB DESCRIPTION: ${data.jobDescription}`;
  
   try {
-  // Get cover letter
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      contents: [
-        {
-          parts: [
-            { text: prompt }
-          ]
-        }
-      ]
-    }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
-  }
-
-  const result = await response.json();
-  const content = result.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!content) {
-    throw new Error('No content received from Gemini');
-  }
-
-  // Get project/work suggestion from LLM
-  let suggestion = '';
-  try {
-    const suggestionRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
+    // Get cover letter
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -77,31 +46,62 @@ export const generateCoverLetter = async (data: FormData): Promise<CoverLetterRe
         contents: [
           {
             parts: [
-              { text: suggestionPrompt }
+              { text: prompt }
             ]
           }
         ]
       }),
     });
-    if (suggestionRes.ok) {
-      const suggestionResult = await suggestionRes.json();
-      suggestion = suggestionResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    }
-  } catch (_e) {
-    suggestion = '';
-  }
 
-  return {
-    coverLetter: content,
-    analysis: {
-      fitScore,
-      relevanceScore: 0,
-      strengths: [],
-      gaps: [],
-      atsKeywords: [],
-      suggestions: [suggestion]
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
     }
-  };
+
+    const result = await response.json();
+    const content = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!content) {
+      throw new Error('No content received from Gemini');
+    }
+
+    // Get project/work suggestion from LLM
+    let suggestion = '';
+    try {
+      const suggestionRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: suggestionPrompt }
+              ]
+            }
+          ]
+        }),
+      });
+      if (suggestionRes.ok) {
+        const suggestionResult = await suggestionRes.json();
+        suggestion = suggestionResult.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      }
+    } catch {
+      suggestion = '';
+    }
+
+    return {
+      coverLetter: content,
+      analysis: {
+        fitScore,
+        relevanceScore: 0,
+        strengths: [],
+        gaps: [],
+        atsKeywords: [],
+        suggestions: [suggestion]
+      }
+    };
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(`Failed to generate cover letter: ${error.message}`);

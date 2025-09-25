@@ -3,7 +3,7 @@ import { User, Briefcase, Building, FileText, Mail, Phone, Trophy, Target, Globe
 import { FormData } from '../types';
 
 interface CoverLetterFormProps {
-  onGenerate: (data: FormData) => void;
+  onGenerate: (_data: FormData) => void;
   isLoading: boolean;
 }
 
