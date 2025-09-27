@@ -137,7 +137,7 @@ function App() {
                     Ready to Generate Your AI-Powered Cover Letter
                   </h3>
                   <p className="text-gray-500">
-                    Fill in your information and job details to create a personalized, ATS-optimized cover letter with detailed analysis.
+                    Fill in your information and job details to create a personalized, ATS-optimized cover letter with detailed analysis and also suggestions for your success.
                   </p>
                 </div>
               )}
